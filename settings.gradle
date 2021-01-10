@@ -1,4 +1,3 @@
 include ':app'
-include ':iris'
 include ':video-process'
 rootProject.name = "compile"
