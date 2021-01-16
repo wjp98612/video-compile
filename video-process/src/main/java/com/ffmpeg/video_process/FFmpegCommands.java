@@ -39,6 +39,8 @@ public class FFmpegCommands {
     }
 
     /**
+     * Extracting image
+     *
      * @param videoUrl
      * @param outputUrl
      * @return
@@ -59,6 +61,14 @@ public class FFmpegCommands {
         return commands;
     }
 
+    /**
+     * Multiple pictures with music composite video
+     *
+     * @param image
+     * @param audio
+     * @param outputUrl
+     * @return
+     */
     public static String[] imageToVideo(@NonNull String image, @NonNull String audio,
                                         @NonNull String outputUrl) {
 
