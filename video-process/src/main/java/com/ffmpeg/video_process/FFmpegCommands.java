@@ -69,37 +69,41 @@ public class FFmpegCommands {
      * @param outputUrl
      * @return
      */
-    public static String[] imageToVideo(@NonNull String image, @NonNull String audio,
-                                        @NonNull String outputUrl) {
+    public static String[] imageToVideo(@NonNull String imageUrl,
+                                        @NonNull String outputUrl,String seconds) {
 
         List<String> strings = new ArrayList<>();
 
         strings.add("ffmpeg");
 
         strings.add("-framerate");
-        strings.add("10");
+        strings.add("0.33");
+
+        strings.add("-f");
+        strings.add("image2");
 
         strings.add("-i");
-        strings.add(image);
+        strings.add(imageUrl);
 
-        strings.add("-i");
-        strings.add(audio);
+        strings.add("-r");
+        strings.add("30");
 
-        strings.add("-absf");
-        strings.add("aac_adtstoasc");
+        strings.add("-pix_fmt");
+        strings.add("yuv420p");
 
-        strings.add("-b");
-        strings.add("1500k");
+        strings.add("-s");
+        strings.add("1080*1920");
 
-        strings.add("-vf");
-        strings.add("setpts=5.0*PTS");
+        strings.add("-t");
+        strings.add(seconds);
 
+        //覆盖输出
+        strings.add("-y");//直接覆盖输出文件
+        //输出文件
         strings.add(outputUrl);
-
         String[] commands = new String[strings.size()];
-
-        for (int i = 0; i < commands.length; i++) {
-            commands[i] = strings.get(i);
+        for(int i=0;i<strings.size();i++){
+            commands[i]=strings.get(i);
         }
         return commands;
     }
