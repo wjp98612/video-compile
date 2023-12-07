@@ -35,6 +35,7 @@ JNIEXPORT jstring JNICALL Java_com_ffmpeg_compile_FFmpegKit_native_1GetFFmpegVer
     strcat(strBuffer, "\navcodec_license : ");
     strcat(strBuffer, avcodec_license());
 
+
     //ASanTestCase::MainTest();
 
     return env->NewStringUTF(strBuffer);
