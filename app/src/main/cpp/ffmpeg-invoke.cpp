@@ -9,7 +9,7 @@ extern "C" {
 #include <libavutil/imgutils.h>
 #include <libswscale/swscale.h>
 #include "android/bitmap.h"
-#include "ffmpeg.h"
+#include "common/ffmpeg.h"
 
 
 #define logDebug(...) __android_log_print(ANDROID_LOG_DEBUG,"MainActivity",__VA_ARGS__)
@@ -60,8 +60,6 @@ Java_com_ffmpeg_compile_FFmpegKit_main(JNIEnv *env, jclass clazz, jobjectArray c
     }
 
     return main(argc, argv);
-
-    return 1;
 }
 
 
