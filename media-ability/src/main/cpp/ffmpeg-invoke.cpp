@@ -14,7 +14,7 @@ extern "C" {
 
 #define logDebug(...) __android_log_print(ANDROID_LOG_DEBUG,"MainActivity",__VA_ARGS__)
 
-JNIEXPORT jstring JNICALL Java_com_ffmpeg_compile_FFmpegKit_native_1GetFFmpegVersion
+JNIEXPORT jstring JNICALL Java_com_ffmpeg_media_1ability_FFmpegKit_native_1GetFFmpegVersion
         (JNIEnv *env, jclass cls)
 {
     char strBuffer[1024 * 4] = {0};
@@ -42,13 +42,13 @@ JNIEXPORT jstring JNICALL Java_com_ffmpeg_compile_FFmpegKit_native_1GetFFmpegVer
 }
 
 JNIEXPORT jstring JNICALL
-Java_com_ffmpeg_compile_FFmpegKit_nativeVersion(JNIEnv *env, jclass clazz) {
+Java_com_ffmpeg_media_1ability_FFmpegKit_nativeVersion(JNIEnv *env, jclass clazz) {
     const char *version = av_version_info();
     return env->NewStringUTF(version);
 }
 
 JNIEXPORT jint JNICALL
-Java_com_ffmpeg_compile_FFmpegKit_main(JNIEnv *env, jclass clazz, jobjectArray cmd) {
+Java_com_ffmpeg_media_1ability_FFmpegKit_main(JNIEnv *env, jclass clazz, jobjectArray cmd) {
     int argc = env->GetArrayLength(cmd);
     logDebug("argc == %d", argc);
     char *argv[argc];
