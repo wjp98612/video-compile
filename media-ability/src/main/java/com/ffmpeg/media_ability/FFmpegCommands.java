@@ -88,9 +88,6 @@ public class FFmpegCommands {
         strings.add("-r");
         strings.add("30");
 
-//        strings.add("-bsf:v");
-//        strings.add("h264_mp4toannexb");
-
         strings.add("-pix_fmt");
         strings.add("yuv420p");
 
