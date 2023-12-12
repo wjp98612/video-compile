@@ -6,7 +6,6 @@ android {
     namespace 'com.ffmpeg.media_ability'
     compileSdkVersion 31
     ndkVersion "21.4.7075529"
-//    ndkVersion "22.1.7171670"
 
     defaultConfig {
         minSdkVersion 21
@@ -28,7 +27,6 @@ android {
                 cppFlags "-std=c++11 -frtti -fexceptions"
             }
         }
-
     }
 
     externalNativeBuild {

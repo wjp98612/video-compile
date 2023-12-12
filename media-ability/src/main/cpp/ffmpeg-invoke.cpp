@@ -9,7 +9,7 @@ extern "C" {
 #include <libavutil/imgutils.h>
 #include <libswscale/swscale.h>
 #include "android/bitmap.h"
-#include "common/ffmpeg.h"
+#include "ffmpeg//ffmpeg.h"
 
 
 #define logDebug(...) __android_log_print(ANDROID_LOG_DEBUG,"MainActivity",__VA_ARGS__)

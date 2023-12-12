@@ -88,6 +88,9 @@ public class FFmpegCommands {
         strings.add("-r");
         strings.add("30");
 
+        strings.add("-vcodec");
+        strings.add("libx264");
+
         strings.add("-pix_fmt");
         strings.add("yuv420p");
 
