@@ -90,6 +90,10 @@ public class FFmpegPlayer {
 
     private native void native_Stop(long playerHandle);
 
+    private void playerEventCallback(int msgType, float msgValue) {
+        if(mEventCallback != null)
+            mEventCallback.onPlayerEvent(msgType, msgValue);
+    }
 
     public interface EventCallback {
         void onPlayerEvent(int msgType, float msgValue);
