@@ -11,6 +11,7 @@ include_directories(
         include
         glm
         ffmpeg
+        common
         ${CMAKE_SOURCE_DIR}/recorder
         ${CMAKE_SOURCE_DIR}/util
         ${CMAKE_SOURCE_DIR}/player
@@ -25,6 +26,7 @@ link_directories(
 file(GLOB src-files
         ${CMAKE_SOURCE_DIR}/*.cpp
         ${CMAKE_SOURCE_DIR}/util/*.cpp
+        ${CMAKE_SOURCE_DIR}/common/*.cpp
         ${CMAKE_SOURCE_DIR}/ffmpeg/*.c
         ${CMAKE_SOURCE_DIR}/player/*.cpp
         ${CMAKE_SOURCE_DIR}/player/decoder/*.cpp
