@@ -117,6 +117,19 @@ Java_com_ffmpeg_media_1ability_FFmpegPlayer_native_1GetMediaParams(JNIEnv *env, 
     return value;
 }
 
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_ffmpeg_media_1ability_FFmpegPlayer_native_1SetMediaParams(JNIEnv *env, jobject thiz,
+                                                                         jlong player_handle,
+                                                                         jint param_type,
+                                                                         jobject param) {
+    if(player_handle != 0)
+    {
+        PlayerWrapper *ffMediaPlayer = reinterpret_cast<PlayerWrapper *>(player_handle);
+        ffMediaPlayer->SetMediaParams(param_type, param);
+    }
+}
+
 /*
  * Class:     com_byteflow_learnffmpeg_media_FFMediaPlayer
  * Method:    native_Pause

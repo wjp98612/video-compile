@@ -1,5 +1,5 @@
 //
-// Created by 公众号：字节流动 on 2019/1/14.
+// Created by 魏魏金鹏 on 2023/12/13.
 //
 
 #ifndef BYTEFLOW_LOGUTIL_H

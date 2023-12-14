@@ -30,6 +30,9 @@
         <activity android:name=".GLMediaPlayerActivity"
             android:screenOrientation="portrait"/>
 
+        <activity android:name=".FFMediaCodecPlayerActivity"
+            android:screenOrientation="portrait"/>
+
     </application>
 
 </manifest>

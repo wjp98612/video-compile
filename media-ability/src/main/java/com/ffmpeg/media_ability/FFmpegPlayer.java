@@ -8,6 +8,10 @@ public class FFmpegPlayer {
     public static final int AUDIO_GL_RENDER = 1;
     public static final int VR_3D_GL_RENDER = 2;
 
+    public static final int FFMEDIA_PLAYER = 0;
+
+    public static final int HWCODEC_PLAYER = 1;
+
 
     static {
         System.loadLibrary("ffmpeg-invoke");
@@ -29,15 +33,16 @@ public class FFmpegPlayer {
     public static final int VIDEO_RENDER_ANWINDOW       = 1;
     public static final int VIDEO_RENDER_3D_VR          = 2;
 
-
-    public static final int FFMEDIA_PLAYER = 0;
-
     private long mNativePlayerHandle = 0;
 
     private EventCallback mEventCallback = null;
 
     public void init(String url, int videoRenderType, Surface surface){
         mNativePlayerHandle = native_Init(url,FFMEDIA_PLAYER,videoRenderType,surface);
+    }
+
+    public void init(String url, int playerType, int videoRenderType, Surface surface) {
+        mNativePlayerHandle = native_Init(url, playerType, videoRenderType, surface);
     }
 
     public void addEventCallback(EventCallback callback) {
@@ -64,17 +69,23 @@ public class FFmpegPlayer {
         native_UnInit(mNativePlayerHandle);
     }
 
+    public long getMediaParams(int paramType) {
+        return native_GetMediaParams(mNativePlayerHandle, paramType);
+    }
+
+    public void setMediaParams(int paramType, Object param) {
+        native_SetMediaParams(mNativePlayerHandle, paramType, param);
+    }
+
     private native long native_Init(String url, int playerType, int renderType, Object surface);
 
     private native void native_Play(long playerHandle);
 
     private native void native_SeekToPosition(long playerHandle, float position);
 
-    public long getMediaParams(int paramType) {
-        return native_GetMediaParams(mNativePlayerHandle, paramType);
-    }
-
     private native long native_GetMediaParams(long playerHandle, int paramType);
+
+    private native void native_SetMediaParams(long playerHandle, int paramType, Object param);
 
     public static native void native_OnSurfaceCreated(int renderType);
     public static native void native_OnSurfaceChanged(int renderType, int width, int height);

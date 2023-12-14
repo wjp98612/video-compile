@@ -76,8 +76,11 @@ public class FFmpegCommands {
 
         strings.add("ffmpeg");
 
+        strings.add("-threads");
+        strings.add("5");
+
         strings.add("-framerate");
-        strings.add("0.33");
+        strings.add("0.66");
 
         strings.add("-f");
         strings.add("image2");
@@ -87,6 +90,9 @@ public class FFmpegCommands {
 
         strings.add("-r");
         strings.add("30");
+
+        strings.add("-c:v");
+        strings.add("libx264");
 
         strings.add("-pix_fmt");
         strings.add("yuv420p");
