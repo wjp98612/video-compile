@@ -14,6 +14,7 @@ extern "C" {
 };
 
 #include <thread>
+#include <jni.h>
 #include "Decoder.h"
 
 #define MAX_PATH   2048
@@ -44,8 +45,15 @@ public:
     {};
     //开始播放
     virtual void Start();
+    virtual void StartWebRtc(uint8_t *buffer);
     //暂停播放
     virtual void Pause();
+
+    virtual void SetWebRtcParams(JNIEnv *env, jobjectArray stringArray) = 0;
+
+    jobject webRtcObj;
+
+    uint8_t *bufferData;
     //停止
     virtual void Stop();
     //获取时长
@@ -102,6 +110,9 @@ private:
     //线程函数
     static void DoAVDecoding(DecoderBase *decoder);
 
+    //获取webrtc的音视频信息参数
+    void getWebRtcParams(JNIEnv *env, jobjectArray stringArray);
+
     //封装格式上下文
     AVFormatContext *m_AVFormatContext = nullptr;
     //解码器上下文
@@ -118,6 +129,9 @@ private:
     char       m_Url[MAX_PATH] = {0};
     //当前播放时间
     long             m_CurTimeStamp = 0;
+
+    AVCodecParameters *webRtcParameters = nullptr;
+
     //播放的起始时间
     long             m_StartTimeStamp = -1;
     //总时长 ms

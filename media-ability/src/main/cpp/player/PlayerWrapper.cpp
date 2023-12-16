@@ -36,6 +36,12 @@ void PlayerWrapper::Play() {
     }
 }
 
+void PlayerWrapper::PlayWebRtc(uint8_t *buffer) {
+    if(m_MediaPlayer) {
+        m_MediaPlayer->PlayWebRtc(buffer);
+    }
+}
+
 void PlayerWrapper::Pause() {
     if(m_MediaPlayer) {
         m_MediaPlayer->Pause();
@@ -66,6 +72,12 @@ long PlayerWrapper::GetMediaParams(int paramType) {
 void PlayerWrapper::SetMediaParams(int paramType, jobject obj) {
     if(m_MediaPlayer) {
         m_MediaPlayer->SetMediaParams(paramType, obj);
+    }
+}
+
+void PlayerWrapper::SetWebRtcParams(jobject obj) {
+    if(m_MediaPlayer) {
+        m_MediaPlayer->SetWebRtcParams(obj);
     }
 
 }

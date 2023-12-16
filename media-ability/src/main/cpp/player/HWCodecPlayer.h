@@ -41,6 +41,7 @@ public:
     virtual void UnInit();
 
     virtual void Play();
+    virtual void PlayBuffer(uint8_t *buffer);
     virtual void Pause();
     virtual void Stop();
     virtual void SeekToPosition(float position);

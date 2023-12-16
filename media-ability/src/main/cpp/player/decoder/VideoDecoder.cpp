@@ -1,8 +1,6 @@
 //
 // Created by 魏魏金鹏 on 2023/12/13.
 //
-// Created by 魏魏金鹏 on 2023/12/13.
-//
 
 
 #include "VideoDecoder.h"

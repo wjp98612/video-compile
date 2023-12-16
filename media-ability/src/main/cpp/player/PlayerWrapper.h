@@ -20,11 +20,13 @@ public:
     void UnInit();
 
     void Play();
+    void PlayWebRtc(uint8_t *buffer);
     void Pause();
     void Stop();
     void SeekToPosition(float position);
     long GetMediaParams(int paramType);
     void SetMediaParams(int paramType, jobject obj);
+    void SetWebRtcParams(jobject obj);
 
 private:
     MediaPlayer* m_MediaPlayer = nullptr;

@@ -17,12 +17,10 @@ extern "C" {
 #include "ffmpeg//ffmpeg.h"
 
 
-
 #define logDebug(...) __android_log_print(ANDROID_LOG_DEBUG,"MainActivity",__VA_ARGS__)
 
 JNIEXPORT jstring JNICALL Java_com_ffmpeg_media_1ability_FFmpegKit_native_1GetFFmpegVersion
-        (JNIEnv *env, jclass cls)
-{
+        (JNIEnv *env, jclass cls) {
     char strBuffer[1024 * 4] = {0};
     strcat(strBuffer, "libavcodec : ");
     strcat(strBuffer, AV_STRINGIFY(LIBAVCODEC_VERSION));
@@ -69,9 +67,8 @@ Java_com_ffmpeg_media_1ability_FFmpegKit_main(JNIEnv *env, jclass clazz, jobject
  * Signature: (JLjava/lang/String;Ljava/lang/Object;)J
  */
 JNIEXPORT jlong JNICALL Java_com_ffmpeg_media_1ability_FFmpegPlayer_native_1Init
-        (JNIEnv *env, jobject obj, jstring jurl, int playerType, jint renderType, jobject surface)
-{
-    const char* url = env->GetStringUTFChars(jurl, nullptr);
+        (JNIEnv *env, jobject obj, jstring jurl, int playerType, jint renderType, jobject surface) {
+    const char *url = env->GetStringUTFChars(jurl, nullptr);
     PlayerWrapper *player = new PlayerWrapper();
     player->Init(env, obj, const_cast<char *>(url), playerType, renderType, surface);
     env->ReleaseStringUTFChars(jurl, url);
@@ -83,11 +80,8 @@ JNIEXPORT jlong JNICALL Java_com_ffmpeg_media_1ability_FFmpegPlayer_native_1Init
  * Method:    native_Play
  * Signature: (J)V
  */
-JNIEXPORT void JNICALL Java_com_ffmpeg_media_1ability_FFmpegPlayer_native_1Play
-        (JNIEnv *env, jobject obj, jlong player_handle)
-{
-    if(player_handle != 0)
-    {
+JNIEXPORT void JNICALL Java_com_ffmpeg_media_1ability_FFmpegPlayer_native_1Play(JNIEnv *env, jobject obj, jlong player_handle) {
+    if (player_handle != 0) {
         PlayerWrapper *pPlayerWrapper = reinterpret_cast<PlayerWrapper *>(player_handle);
         pPlayerWrapper->Play();
     }
@@ -95,10 +89,32 @@ JNIEXPORT void JNICALL Java_com_ffmpeg_media_1ability_FFmpegPlayer_native_1Play
 }
 
 JNIEXPORT void JNICALL
+Java_com_ffmpeg_media_1ability_FFmpegPlayer_native_1PlayWebRtc(JNIEnv *env, jobject obj,jbyteArray data,jlong player_handle) {
+
+    if (data == NULL){
+        logDebug("jbyteArray->frame buffer is null");
+        return;
+    }
+    jsize length = env->GetArrayLength(data);
+
+    uint8_t *buffer = new uint8_t[length];
+
+    jbyte* bytes = env->GetByteArrayElements(data, nullptr);
+    std::memcpy(buffer, bytes, length);
+    env->ReleaseByteArrayElements(data, bytes, JNI_ABORT);
+
+    if (player_handle != 0) {
+        PlayerWrapper *pPlayerWrapper = reinterpret_cast<PlayerWrapper *>(player_handle);
+        pPlayerWrapper->PlayWebRtc(buffer);
+    }
+
+}
+
+JNIEXPORT void JNICALL
 Java_com_ffmpeg_media_1ability_FFmpegPlayer_native_1SeekToPosition(JNIEnv *env, jobject thiz,
-                                                                         jlong player_handle, jfloat position) {
-    if(player_handle != 0)
-    {
+                                                                   jlong player_handle,
+                                                                   jfloat position) {
+    if (player_handle != 0) {
         PlayerWrapper *ffMediaPlayer = reinterpret_cast<PlayerWrapper *>(player_handle);
         ffMediaPlayer->SeekToPosition(position);
     }
@@ -106,11 +122,10 @@ Java_com_ffmpeg_media_1ability_FFmpegPlayer_native_1SeekToPosition(JNIEnv *env, 
 
 JNIEXPORT jlong JNICALL
 Java_com_ffmpeg_media_1ability_FFmpegPlayer_native_1GetMediaParams(JNIEnv *env, jobject thiz,
-                                                                         jlong player_handle,
-                                                                         jint param_type) {
+                                                                   jlong player_handle,
+                                                                   jint param_type) {
     long value = 0;
-    if(player_handle != 0)
-    {
+    if (player_handle != 0) {
         PlayerWrapper *ffMediaPlayer = reinterpret_cast<PlayerWrapper *>(player_handle);
         value = ffMediaPlayer->GetMediaParams(param_type);
     }
@@ -119,12 +134,22 @@ Java_com_ffmpeg_media_1ability_FFmpegPlayer_native_1GetMediaParams(JNIEnv *env, 
 
 extern "C"
 JNIEXPORT void JNICALL
+Java_com_ffmpeg_media_1ability_FFmpegPlayer_native_1SetWebRtcParams(JNIEnv *env, jobject thiz,
+                                                                    jlong player_handle,
+                                                                   jobject param) {
+    if (player_handle != 0) {
+        PlayerWrapper *pPlayerWrapper = reinterpret_cast<PlayerWrapper *>(player_handle);
+        pPlayerWrapper->SetWebRtcParams(param);
+    }
+}
+
+extern "C"
+JNIEXPORT void JNICALL
 Java_com_ffmpeg_media_1ability_FFmpegPlayer_native_1SetMediaParams(JNIEnv *env, jobject thiz,
-                                                                         jlong player_handle,
-                                                                         jint param_type,
-                                                                         jobject param) {
-    if(player_handle != 0)
-    {
+                                                                   jlong player_handle,
+                                                                   jint param_type,
+                                                                   jobject param) {
+    if (player_handle != 0) {
         PlayerWrapper *ffMediaPlayer = reinterpret_cast<PlayerWrapper *>(player_handle);
         ffMediaPlayer->SetMediaParams(param_type, param);
     }
@@ -136,10 +161,8 @@ Java_com_ffmpeg_media_1ability_FFmpegPlayer_native_1SetMediaParams(JNIEnv *env, 
  * Signature: (J)V
  */
 JNIEXPORT void JNICALL Java_com_ffmpeg_media_1ability_FFmpegPlayer_native_1Pause
-        (JNIEnv *env, jobject obj, jlong player_handle)
-{
-    if(player_handle != 0)
-    {
+        (JNIEnv *env, jobject obj, jlong player_handle) {
+    if (player_handle != 0) {
         PlayerWrapper *ffMediaPlayer = reinterpret_cast<PlayerWrapper *>(player_handle);
         ffMediaPlayer->Pause();
     }
@@ -151,10 +174,8 @@ JNIEXPORT void JNICALL Java_com_ffmpeg_media_1ability_FFmpegPlayer_native_1Pause
  * Signature: (J)V
  */
 JNIEXPORT void JNICALL Java_com_ffmpeg_media_1ability_FFmpegPlayer_native_1Stop
-        (JNIEnv *env, jobject obj, jlong player_handle)
-{
-    if(player_handle != 0)
-    {
+        (JNIEnv *env, jobject obj, jlong player_handle) {
+    if (player_handle != 0) {
         PlayerWrapper *ffMediaPlayer = reinterpret_cast<PlayerWrapper *>(player_handle);
         ffMediaPlayer->Stop();
     }
@@ -168,10 +189,8 @@ JNIEXPORT void JNICALL Java_com_ffmpeg_media_1ability_FFmpegPlayer_native_1Stop
  * Signature: (J)V
  */
 JNIEXPORT void JNICALL Java_com_ffmpeg_media_1ability_FFmpegPlayer_native_1UnInit
-        (JNIEnv *env, jobject obj, jlong player_handle)
-{
-    if(player_handle != 0)
-    {
+        (JNIEnv *env, jobject obj, jlong player_handle) {
+    if (player_handle != 0) {
         PlayerWrapper *ffMediaPlayer = reinterpret_cast<PlayerWrapper *>(player_handle);
         ffMediaPlayer->UnInit();
         delete ffMediaPlayer;
@@ -180,10 +199,9 @@ JNIEXPORT void JNICALL Java_com_ffmpeg_media_1ability_FFmpegPlayer_native_1UnIni
 
 JNIEXPORT void JNICALL
 Java_com_ffmpeg_media_1ability_FFmpegPlayer_native_1OnSurfaceCreated(JNIEnv *env,
-                                                                           jclass clazz,
-                                                                           jint render_type) {
-    switch (render_type)
-    {
+                                                                     jclass clazz,
+                                                                     jint render_type) {
+    switch (render_type) {
         case VIDEO_GL_RENDER:
             VideoGLRender::GetInstance()->OnSurfaceCreated();
             break;
@@ -200,11 +218,10 @@ Java_com_ffmpeg_media_1ability_FFmpegPlayer_native_1OnSurfaceCreated(JNIEnv *env
 
 JNIEXPORT void JNICALL
 Java_com_ffmpeg_media_1ability_FFmpegPlayer_native_1OnSurfaceChanged(JNIEnv *env, jclass clazz,
-                                                                           jint render_type,
-                                                                           jint width,
-                                                                           jint height) {
-    switch (render_type)
-    {
+                                                                     jint render_type,
+                                                                     jint width,
+                                                                     jint height) {
+    switch (render_type) {
         case VIDEO_GL_RENDER:
             VideoGLRender::GetInstance()->OnSurfaceChanged(width, height);
             break;
@@ -220,9 +237,9 @@ Java_com_ffmpeg_media_1ability_FFmpegPlayer_native_1OnSurfaceChanged(JNIEnv *env
 }
 
 JNIEXPORT void JNICALL
-Java_com_ffmpeg_media_1ability_FFmpegPlayer_native_1OnDrawFrame(JNIEnv *env, jclass clazz, jint render_type) {
-    switch (render_type)
-    {
+Java_com_ffmpeg_media_1ability_FFmpegPlayer_native_1OnDrawFrame(JNIEnv *env, jclass clazz,
+                                                                jint render_type) {
+    switch (render_type) {
         case VIDEO_GL_RENDER:
             VideoGLRender::GetInstance()->OnDrawFrame();
             break;
@@ -239,20 +256,22 @@ Java_com_ffmpeg_media_1ability_FFmpegPlayer_native_1OnDrawFrame(JNIEnv *env, jcl
 
 JNIEXPORT void JNICALL
 Java_com_ffmpeg_media_1ability_FFmpegPlayer_native_1SetGesture(JNIEnv *env, jclass clazz,
-                                                                     jint   render_type,
-                                                                     jfloat x_rotate_angle,
-                                                                     jfloat y_rotate_angle,
-                                                                     jfloat scale) {
-    switch (render_type)
-    {
+                                                               jint render_type,
+                                                               jfloat x_rotate_angle,
+                                                               jfloat y_rotate_angle,
+                                                               jfloat scale) {
+    switch (render_type) {
         case VIDEO_GL_RENDER:
-            VideoGLRender::GetInstance()->UpdateMVPMatrix(x_rotate_angle, y_rotate_angle, scale, scale);
+            VideoGLRender::GetInstance()->UpdateMVPMatrix(x_rotate_angle, y_rotate_angle, scale,
+                                                          scale);
             break;
         case AUDIO_GL_RENDER:
-            AudioGLRender::GetInstance()->UpdateMVPMatrix(x_rotate_angle, y_rotate_angle, scale, scale);
+            AudioGLRender::GetInstance()->UpdateMVPMatrix(x_rotate_angle, y_rotate_angle, scale,
+                                                          scale);
             break;
         case VR_3D_GL_RENDER:
-            VRGLRender::GetInstance()->UpdateMVPMatrix(x_rotate_angle, y_rotate_angle, scale, scale);
+            VRGLRender::GetInstance()->UpdateMVPMatrix(x_rotate_angle, y_rotate_angle, scale,
+                                                       scale);
             break;
         default:
             break;
@@ -261,11 +280,10 @@ Java_com_ffmpeg_media_1ability_FFmpegPlayer_native_1SetGesture(JNIEnv *env, jcla
 
 JNIEXPORT void JNICALL
 Java_com_ffmpeg_media_1ability_FFmpegPlayer_native_1SetTouchLoc(JNIEnv *env, jclass clazz,
-                                                                      jint   render_type,
-                                                                      jfloat touch_x,
-                                                                      jfloat touch_y) {
-    switch (render_type)
-    {
+                                                                jint render_type,
+                                                                jfloat touch_x,
+                                                                jfloat touch_y) {
+    switch (render_type) {
         case VIDEO_GL_RENDER:
             VideoGLRender::GetInstance()->SetTouchLoc(touch_x, touch_y);
             break;

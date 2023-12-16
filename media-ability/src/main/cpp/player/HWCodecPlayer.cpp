@@ -76,6 +76,17 @@ void HWCodecPlayer::Play() {
     }
 }
 
+void HWCodecPlayer::PlayBuffer(uint8_t *buffer) {
+    LOGCATE("HWCodecPlayer::Play");
+    if(m_DeMuxThread == nullptr) {
+        m_DeMuxThread = new thread(DeMuxThreadProc, this);
+    } else {
+        std::unique_lock<std::mutex> lock(m_Mutex);
+        m_PlayerState = PLAYER_STATE_PLAYING;
+        m_Cond.notify_all();
+    }
+}
+
 void HWCodecPlayer::Pause() {
     LOGCATE("HWCodecPlayer::Pause");
     std::unique_lock<std::mutex> lock(m_Mutex);
@@ -560,6 +571,7 @@ int HWCodecPlayer::InitDecoder() {
         LOGCATE("HWCodecPlayer::InitDecoder AMediaExtractor_getTrackCount %d tracks", numTracks);
         for (int i = 0; i < numTracks; i++) {
             AMediaFormat *format = AMediaExtractor_getTrackFormat(m_MediaExtractor, i);
+
             const char *s = AMediaFormat_toString(format);
             LOGCATE("HWCodecPlayer::InitDecoder track %d format: %s", i, s);
             const char *mime;

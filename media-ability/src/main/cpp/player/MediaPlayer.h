@@ -34,6 +34,10 @@ public:
 
     virtual void Play() = 0;
 
+    virtual void SetWebRtcParams(jobject obj) =0;
+
+    virtual void PlayWebRtc(uint8_t *buffer) = 0;
+
     virtual void Pause() = 0;
 
     virtual void Stop() = 0;

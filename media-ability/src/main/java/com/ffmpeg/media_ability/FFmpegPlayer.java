@@ -81,11 +81,14 @@ public class FFmpegPlayer {
 
     private native void native_Play(long playerHandle);
 
+    private native void native_PlayWebRtc(byte[] data,long playerHandle);
+
     private native void native_SeekToPosition(long playerHandle, float position);
 
     private native long native_GetMediaParams(long playerHandle, int paramType);
 
     private native void native_SetMediaParams(long playerHandle, int paramType, Object param);
+    private native void native_SetWebRtcParams(long playerHandle,Object param);
 
     public static native void native_OnSurfaceCreated(int renderType);
     public static native void native_OnSurfaceChanged(int renderType, int width, int height);

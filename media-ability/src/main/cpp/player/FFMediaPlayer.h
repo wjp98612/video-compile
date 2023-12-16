@@ -15,10 +15,12 @@ public:
     virtual void UnInit();
 
     virtual void Play();
+    virtual void PlayWebRtc(uint8_t *buffer);
     virtual void Pause();
     virtual void Stop();
     virtual void SeekToPosition(float position);
     virtual long GetMediaParams(int paramType);
+    virtual void SetWebRtcParams(jobject obj);
 
 private:
     virtual JNIEnv *GetJNIEnv(bool *isAttach);

@@ -72,6 +72,15 @@ void FFMediaPlayer::Play() {
         m_AudioDecoder->Start();
 }
 
+void FFMediaPlayer::PlayWebRtc(uint8_t *buffer) {
+    LOGCATE("FFMediaPlayer::Play");
+    if(m_VideoDecoder)
+        m_VideoDecoder->StartWebRtc(buffer);
+
+    if(m_AudioDecoder)
+        m_AudioDecoder->StartWebRtc(buffer);
+}
+
 void FFMediaPlayer::Pause() {
     LOGCATE("FFMediaPlayer::Pause");
     if(m_VideoDecoder)
@@ -98,6 +107,16 @@ void FFMediaPlayer::SeekToPosition(float position) {
 
     if(m_AudioDecoder)
         m_AudioDecoder->SeekToPosition(position);
+
+}
+
+void FFMediaPlayer::SetWebRtcParams(jobject obj){
+    LOGCATE("FFMediaPlayer::SetWebRtcParams jobject=%d", obj);
+    if(m_VideoDecoder)
+        m_VideoDecoder->SetWebRtcParams(obj);
+
+    if(m_AudioDecoder)
+        m_AudioDecoder->SetWebRtcParams(obj);
 
 }
 
