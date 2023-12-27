@@ -41,7 +41,12 @@ public:
     virtual void UnInit();
 
     virtual void Play();
-    virtual void PlayBuffer(uint8_t *buffer);
+    virtual void PlayWebRtc(uint8_t *buffer);
+
+    virtual void Nude_H264DecoderInit(int codecType,int width,int height);
+    //处理视频裸数据的解码
+    virtual void Nude_H264Decode(unsigned char * inbuf, int inbufSize);
+
     virtual void Pause();
     virtual void Stop();
     virtual void SeekToPosition(float position);

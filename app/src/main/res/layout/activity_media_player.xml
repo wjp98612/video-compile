@@ -11,12 +11,20 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toTopOf="@+id/seek_bar"
         android:layout_width="match_parent"
-        android:layout_height="0dp">
+        android:layout_height="match_parent">
+
+        <SurfaceView
+            android:id="@+id/texture_view_camera2"
+            android:layout_width="match_parent"
+            android:layout_height="300dp"/>
+
         <com.ffmpeg.compile.MySurfaceView
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_centerInParent="true"
+            android:layout_height="300dp"
+            android:layout_alignParentBottom="true"
             android:id="@+id/surface_view"/>
+
+
     </RelativeLayout>
     <SeekBar
         app:layout_constraintTop_toBottomOf="@id/surface_root"

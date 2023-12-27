@@ -76,7 +76,7 @@ void HWCodecPlayer::Play() {
     }
 }
 
-void HWCodecPlayer::PlayBuffer(uint8_t *buffer) {
+void HWCodecPlayer::PlayWebRtc(uint8_t *buffer) {
     LOGCATE("HWCodecPlayer::Play");
     if(m_DeMuxThread == nullptr) {
         m_DeMuxThread = new thread(DeMuxThreadProc, this);
@@ -85,6 +85,14 @@ void HWCodecPlayer::PlayBuffer(uint8_t *buffer) {
         m_PlayerState = PLAYER_STATE_PLAYING;
         m_Cond.notify_all();
     }
+}
+
+void HWCodecPlayer::Nude_H264DecoderInit(int codecType,int width,int height) {
+
+}
+
+void HWCodecPlayer::Nude_H264Decode(unsigned char * inbuf, int inbufSize) {
+
 }
 
 void HWCodecPlayer::Pause() {

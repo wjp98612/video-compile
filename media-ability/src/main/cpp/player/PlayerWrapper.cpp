@@ -42,6 +42,20 @@ void PlayerWrapper::PlayWebRtc(uint8_t *buffer) {
     }
 }
 
+void PlayerWrapper::Nude_H264DecoderInit(int codecType, int width, int height) {
+
+    if(m_MediaPlayer) {
+        m_MediaPlayer->Nude_H264DecoderInit(codecType,width,height);
+    }
+}
+
+void PlayerWrapper::Nude_H264Decode(unsigned char * inbuf, int inbufSize) {
+
+    if(m_MediaPlayer) {
+        m_MediaPlayer->Nude_H264Decode(inbuf,inbufSize);
+    }
+}
+
 void PlayerWrapper::Pause() {
     if(m_MediaPlayer) {
         m_MediaPlayer->Pause();
@@ -75,9 +89,3 @@ void PlayerWrapper::SetMediaParams(int paramType, jobject obj) {
     }
 }
 
-void PlayerWrapper::SetWebRtcParams(jobject obj) {
-    if(m_MediaPlayer) {
-        m_MediaPlayer->SetWebRtcParams(obj);
-    }
-
-}

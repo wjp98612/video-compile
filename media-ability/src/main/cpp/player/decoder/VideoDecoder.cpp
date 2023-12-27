@@ -7,6 +7,12 @@
 
 void VideoDecoder::OnDecoderReady() {
     LOGCATE("VideoDecoder::OnDecoderReady");
+
+    if(m_SwsContext != nullptr) {
+        sws_freeContext(m_SwsContext);
+        m_SwsContext = nullptr;
+    }
+
     m_VideoWidth = GetCodecContext()->width;
     m_VideoHeight = GetCodecContext()->height;
 
@@ -20,11 +26,13 @@ void VideoDecoder::OnDecoderReady() {
         m_RenderHeight = dstSize[1];
 
         if(m_VideoRender->GetRenderType() == VIDEO_RENDER_ANWINDOW) {
-            int fps = 25;
-            long videoBitRate = m_RenderWidth * m_RenderHeight * fps * 0.2;
-            m_pVideoRecorder = new SingleVideoRecorder("/sdcard/learnffmpeg_output.mp4", m_RenderWidth, m_RenderHeight, videoBitRate, fps);
-            m_pVideoRecorder->StartRecord();
+//            int fps = 25;
+//            long videoBitRate = m_RenderWidth * m_RenderHeight * fps * 0.2;
+//            m_pVideoRecorder = new SingleVideoRecorder("/sdcard/learnffmpeg_output.mp4", m_RenderWidth, m_RenderHeight, videoBitRate, fps);
+//            m_pVideoRecorder->StartRecord();
         }
+
+        GetCodecContext()->pix_fmt = AV_PIX_FMT_YUV420P;
 
         m_RGBAFrame = av_frame_alloc();
         int bufferSize = av_image_get_buffer_size(DST_PIXEL_FORMAT, m_RenderWidth, m_RenderHeight, 1);
@@ -32,9 +40,34 @@ void VideoDecoder::OnDecoderReady() {
         av_image_fill_arrays(m_RGBAFrame->data, m_RGBAFrame->linesize,
                              m_FrameBuffer, DST_PIXEL_FORMAT, m_RenderWidth, m_RenderHeight, 1);
 
+        LOGCATE("VideoDecoder::OnDecoderReady m_VideoWidth=%d", m_VideoWidth);
+        LOGCATE("VideoDecoder::OnDecoderReady m_VideoHeight=%d", m_VideoHeight);
+        LOGCATE("VideoDecoder::OnDecoderReady GetCodecContext()->pix_fmt=%d", GetCodecContext()->pix_fmt);
+        LOGCATE("VideoDecoder::OnDecoderReady m_RenderWidth=%d", m_RenderWidth);
+        LOGCATE("VideoDecoder::OnDecoderReady m_RenderHeight=%d", m_RenderHeight);
+        LOGCATE("VideoDecoder::OnDecoderReady DST_PIXEL_FORMAT=%d", DST_PIXEL_FORMAT);
+
         m_SwsContext = sws_getContext(m_VideoWidth, m_VideoHeight, GetCodecContext()->pix_fmt,
                                       m_RenderWidth, m_RenderHeight, DST_PIXEL_FORMAT,
                                       SWS_FAST_BILINEAR, NULL, NULL, NULL);
+
+
+        if (m_SwsContext == nullptr){
+            m_SwsContext = sws_getContext(m_VideoWidth, m_VideoHeight, GetCodecContext()->pix_fmt,
+                                          m_RenderWidth, m_RenderHeight, DST_PIXEL_FORMAT,
+                                          SWS_FAST_BILINEAR, NULL, NULL, NULL);
+        }
+
+        LOGCATE("VideoDecoder::OnFrameAvailable m_SwsContext9999=%d", GetCodecContext()->pix_fmt);
+
+        if (m_SwsContext == nullptr){
+            m_SwsContext = sws_getContext(m_VideoWidth, m_VideoHeight, GetCodecContext()->pix_fmt,
+                                          m_RenderWidth, m_RenderHeight, DST_PIXEL_FORMAT,
+                                          SWS_FAST_BILINEAR, NULL, NULL, NULL);
+        }
+
+        LOGCATE("VideoDecoder::OnFrameAvailable m_SwsContext111=%d", m_SwsContext);
+
     } else {
         LOGCATE("VideoDecoder::OnDecoderReady m_VideoRender == null");
     }
@@ -69,16 +102,16 @@ void VideoDecoder::OnDecoderDone() {
         delete m_pVideoRecorder;
         m_pVideoRecorder = nullptr;
     }
-
 }
 
 void VideoDecoder::OnFrameAvailable(AVFrame *frame) {
-    LOGCATE("VideoDecoder::OnFrameAvailable frame=%p", frame);
-    if(m_VideoRender != nullptr && frame != nullptr) {
+    LOGCATE("VideoDecoder::decode_error_flags frame=%p", frame->decode_error_flags);
+    if(m_VideoRender != nullptr && frame != nullptr ) {
         NativeImage image;
         LOGCATE("VideoDecoder::OnFrameAvailable frame[w,h]=[%d, %d],format=%d,[line0,line1,line2]=[%d, %d, %d]", frame->width, frame->height, GetCodecContext()->pix_fmt, frame->linesize[0], frame->linesize[1],frame->linesize[2]);
         if(m_VideoRender->GetRenderType() == VIDEO_RENDER_ANWINDOW)
         {
+
             sws_scale(m_SwsContext, frame->data, frame->linesize, 0,
                       m_VideoHeight, m_RGBAFrame->data, m_RGBAFrame->linesize);
 
@@ -124,6 +157,7 @@ void VideoDecoder::OnFrameAvailable(AVFrame *frame) {
             image.pLineSize[0] = frame->linesize[0];
             image.ppPlane[0] = frame->data[0];
         } else {
+            LOGCATE("VideoDecoder::OnFrameAvailable m_SwsContext8888=%d", m_SwsContext);
             sws_scale(m_SwsContext, frame->data, frame->linesize, 0,
                       m_VideoHeight, m_RGBAFrame->data, m_RGBAFrame->linesize);
             image.format = IMAGE_FORMAT_RGBA;

@@ -16,11 +16,15 @@ public:
 
     virtual void Play();
     virtual void PlayWebRtc(uint8_t *buffer);
+
+    virtual void Nude_H264DecoderInit(int codecType,int width,int height);
+    //处理视频裸数据的解码
+    virtual void Nude_H264Decode(unsigned char * inbuf, int inbufSize);
+
     virtual void Pause();
     virtual void Stop();
     virtual void SeekToPosition(float position);
     virtual long GetMediaParams(int paramType);
-    virtual void SetWebRtcParams(jobject obj);
 
 private:
     virtual JNIEnv *GetJNIEnv(bool *isAttach);

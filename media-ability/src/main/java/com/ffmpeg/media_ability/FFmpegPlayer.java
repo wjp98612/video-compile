@@ -45,12 +45,24 @@ public class FFmpegPlayer {
         mNativePlayerHandle = native_Init(url, playerType, videoRenderType, surface);
     }
 
+    public void initNudeDecoder(int codecType,int width,int height){
+        native_NudeDecoderInit(codecType,width,height,mNativePlayerHandle);
+    }
+
+    public void nudeDecode(byte[] data,int bufferSize){
+        native_NudeDecode(data,bufferSize,true,mNativePlayerHandle);
+    }
+
     public void addEventCallback(EventCallback callback) {
         mEventCallback = callback;
     }
 
     public void play(){
         native_Play(mNativePlayerHandle);
+    }
+
+    public void playBuffer(byte[] bytes){
+        native_PlayWebRtc(bytes,false,mNativePlayerHandle);
     }
 
     public void pause(){
@@ -81,14 +93,17 @@ public class FFmpegPlayer {
 
     private native void native_Play(long playerHandle);
 
-    private native void native_PlayWebRtc(byte[] data,long playerHandle);
+    private native void native_PlayWebRtc(byte[] data,boolean isCoby,long playerHandle);
 
     private native void native_SeekToPosition(long playerHandle, float position);
 
     private native long native_GetMediaParams(long playerHandle, int paramType);
 
     private native void native_SetMediaParams(long playerHandle, int paramType, Object param);
-    private native void native_SetWebRtcParams(long playerHandle,Object param);
+
+    private native void native_NudeDecoderInit(int codecType,int width,int height,long playerHandle);
+
+    private native void native_NudeDecode(byte[] data,int bufferSize,boolean isCoby,long playerHandle);
 
     public static native void native_OnSurfaceCreated(int renderType);
     public static native void native_OnSurfaceChanged(int renderType, int width, int height);

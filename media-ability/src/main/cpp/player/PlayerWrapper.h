@@ -21,12 +21,16 @@ public:
 
     void Play();
     void PlayWebRtc(uint8_t *buffer);
+
+    void Nude_H264DecoderInit(int codecType, int width, int height);
+    //处理视频裸数据的解码
+    void Nude_H264Decode(unsigned char * inbuf, int inbufSize);
+
     void Pause();
     void Stop();
     void SeekToPosition(float position);
     long GetMediaParams(int paramType);
     void SetMediaParams(int paramType, jobject obj);
-    void SetWebRtcParams(jobject obj);
 
 private:
     MediaPlayer* m_MediaPlayer = nullptr;

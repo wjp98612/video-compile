@@ -18,18 +18,7 @@ void DecoderBase::Start() {
 }
 
 void DecoderBase::StartWebRtc(uint8_t *buffer) {
-    if (m_Thread == nullptr) {
-        bufferData = buffer;
-        StartDecodingThread();
-    } else {
-        std::unique_lock<std::mutex> lock(m_Mutex);
-        m_DecoderState = STATE_DECODING;
-        m_Cond.notify_all();
-    }
-}
-
-void DecoderBase::SetWebRtcParams(jobject obj) {
-    webRtcObj = obj;
+    bufferData = buffer;
 }
 
 void DecoderBase::Pause() {
@@ -87,13 +76,11 @@ int DecoderBase::InitFFDecoder() {
             LOGCATE("DecoderBase::InitFFDecoder avformat_open_input fail.");
             break;
         }
-
         //3.获取音视频流信息
         if (avformat_find_stream_info(m_AVFormatContext, NULL) < 0) {
             LOGCATE("DecoderBase::InitFFDecoder avformat_find_stream_info fail.");
             break;
         }
-
         //4.获取音视频流索引
         for (int i = 0; i < m_AVFormatContext->nb_streams; i++) {
             if (m_AVFormatContext->streams[i]->codecpar->codec_type == m_MediaType) {
@@ -101,7 +88,6 @@ int DecoderBase::InitFFDecoder() {
                 break;
             }
         }
-
         if (m_StreamIndex == -1) {
             LOGCATE("DecoderBase::InitFFDecoder Fail to find stream index.");
             break;
@@ -109,16 +95,8 @@ int DecoderBase::InitFFDecoder() {
 
         //5.获取解码器参数
         AVCodecParameters *codecParameters = m_AVFormatContext->streams[m_StreamIndex]->codecpar;
+        codecParameters->codec_id = AV_CODEC_ID_H264;
 
-        LOGCATE("DecoderBase::codecParameters::bit_rate=%d",codecParameters->bit_rate);
-        LOGCATE("DecoderBase::codecParameters::channels=%d",codecParameters->channels);
-        LOGCATE("DecoderBase::codecParameters::codec_id=%d",codecParameters->codec_id);
-        LOGCATE("DecoderBase::codecParameters::frame_size=%d",codecParameters->frame_size);
-        LOGCATE("DecoderBase::codecParameters::codec_type=%d",codecParameters->codec_type);
-
-        if (bufferData != NULL){
-
-        }
         //6.获取解码器(找到对应的解码器)
         m_AVCodec = avcodec_find_decoder(codecParameters->codec_id);
         if (m_AVCodec == nullptr) {
@@ -132,6 +110,8 @@ int DecoderBase::InitFFDecoder() {
             LOGCATE("DecoderBase::InitFFDecoder avcodec_parameters_to_context fail.");
             break;
         }
+
+        m_AVCodecContext->thread_count = 5;
 
         AVDictionary *pAVDictionary = nullptr;
         av_dict_set(&pAVDictionary, "buffer_size", "1024000", 0);
@@ -152,6 +132,7 @@ int DecoderBase::InitFFDecoder() {
         m_Packet = av_packet_alloc();
         //创建 AVFrame 存放解码后的数据
         m_Frame = av_frame_alloc();
+        LOGCATE("DecoderBase");
     } while (false);
 
     if (result != 0 && m_MsgContext && m_MsgCallback)
@@ -191,8 +172,12 @@ void DecoderBase::StartDecodingThread() {
     m_Thread = new thread(DoAVDecoding, this);
 }
 
+void DecoderBase::StartDecodingThreadNude() {
+    m_Thread = new thread(DoAVDecodingNude, this);
+}
+
 void DecoderBase::DecodingLoop() {
-    LOGCATE("DecoderBase::DecodingLoop start, m_MediaType=%d", m_MediaType);
+    LOGCATE("DecoderBase::DecodingLoop start, m_Packet=%d", m_Packet);
     {
         std::unique_lock<std::mutex> lock(m_Mutex);
         m_DecoderState = STATE_DECODING;
@@ -266,6 +251,7 @@ long DecoderBase::AVSync() {
 }
 
 int DecoderBase::DecodeOnePacket() {
+
     LOGCATE("DecoderBase::DecodeOnePacket m_MediaType=%d", m_MediaType);
     if (m_SeekPosition > 0) {
         //seek to frame
@@ -288,24 +274,32 @@ int DecoderBase::DecodeOnePacket() {
         }
     }
     //读取封装数据
-    int result = av_read_frame(m_AVFormatContext, m_Packet);
+    int result = 0;
 
-//    m_Packet->data = bufferData;
+    LOGCATE("BaseDecoder::->av_read_frame==%d", m_Packet);
+    result = av_read_frame(m_AVFormatContext, m_Packet);
 
     while (result == 0) {
         if (m_Packet->stream_index == m_StreamIndex) {
-//            UpdateTimeStamp(m_Packet);
+
 //            if(AVSync() > DELAY_THRESHOLD && m_CurTimeStamp > DELAY_THRESHOLD)
 //            {
 //                result = 0;
 //                goto __EXIT;
 //            }
 
+            LOGCATE("BaseDecoder::->avcodec_send_packet==%d", m_Packet->size);
             //发送给解码器开始真正的解码
-            if (avcodec_send_packet(m_AVCodecContext, m_Packet) == AVERROR_EOF) {
+
+            int valueId = avcodec_send_packet(m_AVCodecContext, m_Packet);
+            if (valueId == AVERROR_EOF) {
                 //解码结束
                 result = -1;
                 goto __EXIT;
+            }
+
+            if (valueId == AVERROR_INVALIDDATA){
+                LOGCATE("BaseDecoder:::AVERROR_INVALIDDATA");
             }
 
             //一个 packet 包含多少 frame?
@@ -316,9 +310,7 @@ int DecoderBase::DecodeOnePacket() {
                 //同步
                 AVSync();
                 //渲染
-                LOGCATE("DecoderBase::DecodeOnePacket 000 m_MediaType=%d", m_MediaType);
                 OnFrameAvailable(m_Frame);
-                LOGCATE("DecoderBase::DecodeOnePacket 0001 m_MediaType=%d", m_MediaType);
                 frameCount++;
             }
             LOGCATE("BaseDecoder::DecodeOneFrame frameCount=%d", frameCount);
@@ -337,6 +329,7 @@ int DecoderBase::DecodeOnePacket() {
     return result;
 }
 
+
 void DecoderBase::DoAVDecoding(DecoderBase *decoder) {
     LOGCATE("DecoderBase::DoAVDecoding");
     do {
@@ -351,23 +344,131 @@ void DecoderBase::DoAVDecoding(DecoderBase *decoder) {
     decoder->OnDecoderDone();
 }
 
+void DecoderBase::DoAVDecodingNude(DecoderBase *decoder) {
+    LOGCATE("DecoderBase::DoAVDecoding");
+    do {
+        decoder->OnDecoderReady();
+    } while (false);
+}
 
-void DecoderBase::getWebRtcParams(JNIEnv *env, jobjectArray stringArray) {
-    jsize stringArrayLength = env->GetArrayLength(stringArray);
+void DecoderBase::Nude_H264DecoderInit(int codecType,int width,int height) {
 
-    for(int i = 0; i < stringArrayLength; i ++) {
+    AVCodecID id;
+    if (codecType == 0){
+        id  = AV_CODEC_ID_H264;
+    } else{
+        id  = AV_CODEC_ID_HEVC;
+    }
+    AVCodec *pAVCodec = avcodec_find_decoder(id);
+    if (!pAVCodec) {
+        LOGCATE("can not find H264 codec\n");
+    }
 
-        jobject string_object = env->GetObjectArrayElement(stringArray, i);
+    AVCodecContext *pAVCodecCtx = avcodec_alloc_context3(pAVCodec);
+    if (pAVCodecCtx == NULL) {
+        LOGCATE("Could not alloc video context!\n");
+    }
 
-        jstring string_java = static_cast<jstring>(string_object);
+    AVCodecParameters *codecParameters = avcodec_parameters_alloc();
+    if (avcodec_parameters_from_context(codecParameters, pAVCodecCtx) < 0) {
+        avcodec_parameters_free(&codecParameters);
+        avcodec_free_context(&pAVCodecCtx);
+    }
 
-        const char *string_c = env->GetStringUTFChars(string_java, 0);
+    Nude_VideoDecoderInit(codecParameters,width,height);
+    avcodec_parameters_free(&codecParameters);
+    avcodec_free_context(&pAVCodecCtx);
+}
 
-        __android_log_print(ANDROID_LOG_INFO, "JNI_TAG", "打印字符串数组元素 : %d . %s", i, string_c);
 
-        env->ReleaseStringUTFChars(string_java, string_c);
+void DecoderBase::Nude_H264Decode(unsigned char *inbuf, int inbufSize) {
 
+    if (!m_AVCodecContext || !m_Frame || !inbuf || inbufSize <= 0) {
+        LOGCATE("Nude_H264Decode:::return -1;=%d", -1);
+        return;
+    }
+
+    m_Packet->data = inbuf;
+    m_Packet->size = inbufSize;
+
+    av_init_packet(m_Packet);
+
+    int valueId = avcodec_send_packet(m_AVCodecContext, m_Packet);
+    if (valueId == AVERROR_EOF) {
+        //解码结束
+    }
+
+    if (valueId == 0) {
+        while (avcodec_receive_frame(m_AVCodecContext, m_Frame) == 0) {
+
+            OnFrameAvailable(m_Frame);
+        }
     }
 }
+
+int DecoderBase::Nude_VideoDecoderInit(AVCodecParameters *codecParameters,int width,int height) {
+
+    if (!codecParameters) {
+        LOGCATE("Source codec context is NULL.");
+        return -1;
+    }
+
+    m_AVCodec = avcodec_find_decoder(codecParameters->codec_id);
+    if (!m_AVCodec) {
+        LOGCATE("Can not find codec:%d\n", codecParameters->codec_id);
+        return -2;
+    }
+    m_AVCodecContext = avcodec_alloc_context3(m_AVCodec);
+    if (!m_AVCodecContext) {
+        LOGCATE("Failed to alloc codec context.");
+        Nude_VideoDecoderRelease();
+        return -3;
+    }
+    if (avcodec_parameters_to_context(m_AVCodecContext, codecParameters) < 0) {
+        LOGCATE("Failed to copy avcodec parameters to codec context.");
+        Nude_VideoDecoderRelease();
+        return -3;
+    }
+
+    if (avcodec_open2(m_AVCodecContext, m_AVCodec, NULL) < 0) {
+        LOGCATE("Failed to open h264 decoder");
+        Nude_VideoDecoderRelease();
+        return -4;
+    }
+
+    m_AVCodecContext->width = width;
+
+    m_AVCodecContext->height = height;
+
+    m_AVCodecContext->thread_count =10;
+
+    m_Packet = av_packet_alloc();
+
+    m_Frame = av_frame_alloc();
+
+    StartDecodingThreadNude();
+
+    return 0;
+}
+
+int DecoderBase::Nude_VideoDecoderRelease() {
+    if (m_AVCodecContext != NULL) {
+        avcodec_free_context(&m_AVCodecContext);
+        m_AVCodecContext = NULL;
+    }
+
+    if (m_Frame != NULL) {
+        av_packet_unref(m_Packet);
+        av_free(m_Frame);
+        m_Frame = NULL;
+    }
+
+    if (m_Packet != NULL){
+        av_packet_unref(m_Packet);
+    }
+
+    return 0;
+}
+
 
 

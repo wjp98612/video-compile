@@ -10,6 +10,7 @@ extern "C" {
 #include <libavformat/avformat.h>
 #include <libavutil/frame.h>
 #include <libavutil/time.h>
+#include <libswscale/swscale.h>
 #include <libavcodec/jni.h>
 };
 
@@ -49,11 +50,12 @@ public:
     //暂停播放
     virtual void Pause();
 
-    virtual void SetWebRtcParams(JNIEnv *env, jobjectArray stringArray) = 0;
+    //处理视频裸数据的解码
+    void Nude_H264DecoderInit(int codecType,int width,int height);
 
-    jobject webRtcObj;
+    //处理视频裸数据的解码
+    void Nude_H264Decode(unsigned char * inbuf, int inbufSize);
 
-    uint8_t *bufferData;
     //停止
     virtual void Stop();
     //获取时长
@@ -99,6 +101,7 @@ private:
     void UnInitDecoder();
     //启动解码线程
     void StartDecodingThread();
+    void StartDecodingThreadNude();
     //音视频解码循环
     void DecodingLoop();
     //更新显示时间戳
@@ -109,9 +112,13 @@ private:
     int DecodeOnePacket();
     //线程函数
     static void DoAVDecoding(DecoderBase *decoder);
+    static void DoAVDecodingNude(DecoderBase *decoder);
 
-    //获取webrtc的音视频信息参数
-    void getWebRtcParams(JNIEnv *env, jobjectArray stringArray);
+    //处理视频裸数据的解码释放
+    int Nude_VideoDecoderRelease();
+
+    //处理视频裸数据的解码
+    int Nude_VideoDecoderInit(AVCodecParameters *ctx,int width,int height);
 
     //封装格式上下文
     AVFormatContext *m_AVFormatContext = nullptr;
@@ -129,6 +136,10 @@ private:
     char       m_Url[MAX_PATH] = {0};
     //当前播放时间
     long             m_CurTimeStamp = 0;
+
+    SwsContext *m_SwsContext = nullptr;
+
+    uint8_t *bufferData;
 
     AVCodecParameters *webRtcParameters = nullptr;
 

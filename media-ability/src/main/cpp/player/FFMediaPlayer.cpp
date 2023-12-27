@@ -73,12 +73,30 @@ void FFMediaPlayer::Play() {
 }
 
 void FFMediaPlayer::PlayWebRtc(uint8_t *buffer) {
-    LOGCATE("FFMediaPlayer::Play");
+    LOGCATE("FFMediaPlayer::PlayWebRtc");
     if(m_VideoDecoder)
         m_VideoDecoder->StartWebRtc(buffer);
 
     if(m_AudioDecoder)
         m_AudioDecoder->StartWebRtc(buffer);
+}
+
+void FFMediaPlayer::Nude_H264DecoderInit(int codecType,int width,int height) {
+    LOGCATE("FFMediaPlayer::Nude_H264DecoderInit");
+    if(m_VideoDecoder)
+        m_VideoDecoder->Nude_H264DecoderInit(codecType,width,height);
+
+    if(m_AudioDecoder)
+        m_AudioDecoder->Nude_H264DecoderInit(codecType,width,height);
+}
+
+void FFMediaPlayer::Nude_H264Decode(unsigned char * inbuf, int inbufSize) {
+    LOGCATE("FFMediaPlayer::Nude_H264Decode");
+    if(m_VideoDecoder)
+        m_VideoDecoder->Nude_H264Decode(inbuf,inbufSize);
+
+    if(m_AudioDecoder)
+        m_AudioDecoder->Nude_H264Decode(inbuf,inbufSize);
 }
 
 void FFMediaPlayer::Pause() {
@@ -107,16 +125,6 @@ void FFMediaPlayer::SeekToPosition(float position) {
 
     if(m_AudioDecoder)
         m_AudioDecoder->SeekToPosition(position);
-
-}
-
-void FFMediaPlayer::SetWebRtcParams(jobject obj){
-    LOGCATE("FFMediaPlayer::SetWebRtcParams jobject=%d", obj);
-    if(m_VideoDecoder)
-        m_VideoDecoder->SetWebRtcParams(obj);
-
-    if(m_AudioDecoder)
-        m_AudioDecoder->SetWebRtcParams(obj);
 
 }
 

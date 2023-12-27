@@ -1,5 +1,6 @@
 #include <jni.h>
 #include "PlayerWrapper.h"
+#include "NudeVideoDecoder.h"
 
 #include <render/video/VideoGLRender.h>
 #include <render/video/VRGLRender.h>
@@ -89,24 +90,64 @@ JNIEXPORT void JNICALL Java_com_ffmpeg_media_1ability_FFmpegPlayer_native_1Play(
 }
 
 JNIEXPORT void JNICALL
-Java_com_ffmpeg_media_1ability_FFmpegPlayer_native_1PlayWebRtc(JNIEnv *env, jobject obj,jbyteArray data,jlong player_handle) {
+Java_com_ffmpeg_media_1ability_FFmpegPlayer_native_1PlayWebRtc(JNIEnv *env, jobject obj,jbyteArray data,jboolean isCopy,jlong player_handle) {
 
     if (data == NULL){
         logDebug("jbyteArray->frame buffer is null");
         return;
     }
-    jsize length = env->GetArrayLength(data);
 
-    uint8_t *buffer = new uint8_t[length];
-
-    jbyte* bytes = env->GetByteArrayElements(data, nullptr);
-    std::memcpy(buffer, bytes, length);
-    env->ReleaseByteArrayElements(data, bytes, JNI_ABORT);
+    jbyte *bytes = env->GetByteArrayElements(data, &isCopy);
+    uint8_t *buffer = (uint8_t *)bytes;
 
     if (player_handle != 0) {
         PlayerWrapper *pPlayerWrapper = reinterpret_cast<PlayerWrapper *>(player_handle);
         pPlayerWrapper->PlayWebRtc(buffer);
     }
+
+}
+
+/**
+ * 解码webRtc的裸数据
+ * @param env
+ * @param obj
+ * @param data
+ * @param isCopy
+ * @param player_handle
+ */
+JNIEXPORT void JNICALL
+Java_com_ffmpeg_media_1ability_FFmpegPlayer_native_1NudeDecoderInit(JNIEnv *env, jobject obj,
+                                                                    jint codecType, jint width,jint height,jlong player_handle) {
+
+    if (player_handle != 0) {
+        PlayerWrapper *pPlayerWrapper = reinterpret_cast<PlayerWrapper *>(player_handle);
+        pPlayerWrapper->Nude_H264DecoderInit(codecType,width,height);
+    }
+
+//    NudeVideoDecoder *nudeVideoDecoder = reinterpret_cast<NudeVideoDecoder *>(player_handle);
+//    nudeVideoDecoder->Nude_H264DecoderInit();
+}
+
+
+JNIEXPORT void JNICALL
+Java_com_ffmpeg_media_1ability_FFmpegPlayer_native_1NudeDecode(JNIEnv *env, jobject obj,jbyteArray data,jint bufferSize,jboolean isCopy,jlong player_handle) {
+
+    if (data == NULL){
+        logDebug("jbyteArray->frame buffer is null");
+        return;
+    }
+
+    jbyte *bytes = env->GetByteArrayElements(data, &isCopy);
+    uint8_t *buffer = (uint8_t *)bytes;
+
+    if (player_handle != 0) {
+        PlayerWrapper *pPlayerWrapper = reinterpret_cast<PlayerWrapper *>(player_handle);
+        pPlayerWrapper->Nude_H264Decode(buffer,bufferSize);
+    }
+
+//    NudeVideoDecoder *nudeVideoDecoder = reinterpret_cast<NudeVideoDecoder *>(player_handle);
+//
+//    nudeVideoDecoder->Nude_H264Decode(buffer,bufferSize);
 
 }
 
@@ -132,16 +173,6 @@ Java_com_ffmpeg_media_1ability_FFmpegPlayer_native_1GetMediaParams(JNIEnv *env, 
     return value;
 }
 
-extern "C"
-JNIEXPORT void JNICALL
-Java_com_ffmpeg_media_1ability_FFmpegPlayer_native_1SetWebRtcParams(JNIEnv *env, jobject thiz,
-                                                                    jlong player_handle,
-                                                                   jobject param) {
-    if (player_handle != 0) {
-        PlayerWrapper *pPlayerWrapper = reinterpret_cast<PlayerWrapper *>(player_handle);
-        pPlayerWrapper->SetWebRtcParams(param);
-    }
-}
 
 extern "C"
 JNIEXPORT void JNICALL

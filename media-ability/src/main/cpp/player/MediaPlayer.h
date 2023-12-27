@@ -34,9 +34,14 @@ public:
 
     virtual void Play() = 0;
 
-    virtual void SetWebRtcParams(jobject obj) =0;
-
     virtual void PlayWebRtc(uint8_t *buffer) = 0;
+
+    //处理视频裸数据的解码
+    virtual void Nude_H264DecoderInit(int codecType,int width,int height) = 0;
+
+    //处理视频裸数据的解码
+    virtual void Nude_H264Decode(unsigned char * inbuf, int inbufSize) = 0;
+
 
     virtual void Pause() = 0;
 

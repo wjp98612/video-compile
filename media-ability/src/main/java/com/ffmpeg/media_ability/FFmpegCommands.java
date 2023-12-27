@@ -70,7 +70,7 @@ public class FFmpegCommands {
      * @return
      */
     public static String[] imageToVideo(@NonNull String imageUrl,
-                                        @NonNull String outputUrl,String seconds) {
+                                        @NonNull String outputUrl, String seconds) {
 
         List<String> strings = new ArrayList<>();
 
@@ -108,11 +108,59 @@ public class FFmpegCommands {
         //输出文件
         strings.add(outputUrl);
         String[] commands = new String[strings.size()];
-        for(int i=0;i<strings.size();i++){
-            commands[i]=strings.get(i);
+
+        for (int i = 0; i < commands.length; i++) {
+            commands[i] = strings.get(i);
         }
+
         return commands;
     }
+
+    //ffmpeg -i input1.mp4 -i input2.mp4 -lavfi vstack output.mp4
+    //-f concat -i list.txt -c copy concat.mp4
+    //ffmpeg -i input1.mp4 -i input2.mp4 -filter_complex "[0:v][1:v]concat=n=2:v=1:a=0[outv] -map "[outv]" -strict -2 output.mp4
+//    ffmpeg -i File_1.mp4 -i File_2.mp4 -filter_complex "[0:v]scale=720:576:force_original_aspect_ratio=decrease,setsar=1,pad=720:576:(ow-iw)/2:(oh-ih)/2[0v];[1:v]scale=720:576:force_original_aspect_ratio=decrease,setsar=1,pad=720:576:(ow-iw)/2:(oh-ih)/2[1v];[0v][0:a][1v][1:a]concat=n=2:v=1:a=1[outv][outa]" -map "[outv]" -map "[outa]" -c:v libx264 -crf 23 ffmpeg1.mp4
+
+    public static String[] mergeVideo(@NonNull List<String> videoUrls, @NonNull String outputUrl) {
+
+        List<String> strings = new ArrayList<>();
+
+        strings.add("ffmpeg");
+
+        for (String s : videoUrls){
+            strings.add("-i");
+            strings.add(s);
+        }
+
+        strings.add("-filter_complex");
+        strings.add("[0:v]scale=1920:1080:force_original_aspect_ratio=decrease,setsar=1,pad=1920:1080:(ow-iw)/2:(oh-ih)/2[0v];[1:v]scale=1920:1080:force_original_aspect_ratio=decrease,setsar=1,pad=1920:1080:(ow-iw)/2:(oh-ih)/2[1v];[0v][0:a][1v][1:a]concat=n=2:v=1:a=1[outv][outa]");
+
+        strings.add("-map");
+        strings.add("[outv]");
+
+        strings.add("-map");
+        strings.add("[outa]");
+
+        strings.add("-c:v");
+        strings.add("libx264");
+
+        strings.add("-crf");
+        strings.add("23");
+
+        //覆盖输出
+        strings.add("-y");//直接覆盖输出文件
+
+        //输出文件
+        strings.add(outputUrl);
+        String[] commands = new String[strings.size()];
+
+        for (int i = 0; i < strings.size(); i++) {
+            commands[i] = strings.get(i);
+        }
+
+        return commands;
+    }
+
 
     public static String[] addImageMark(String appNameImage, String iconImage, String videoUrl,
                                         String outputUrl) {
