@@ -13,6 +13,7 @@ public class FFmpegPlayer {
     public static final int HWCODEC_PLAYER = 1;
 
 
+
     static {
         System.loadLibrary("ffmpeg-invoke");
     }
